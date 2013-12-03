@@ -71,7 +71,7 @@ user_wifi()
 	echo ''
 }
 
-TEMP=`getopt -o i:ost:v: --long login:,logout,scan:,token,view: -n 'sintesis' -- "$@"`
+TEMP=`getopt -o i:o:st:v: --long login:,logout:,scan:,token,view: -n 'sintesis' -- "$@"`
 eval set -- "$TEMP"
 
 while true; do
