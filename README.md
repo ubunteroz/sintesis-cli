@@ -3,7 +3,11 @@
 
 Sistem Informasi Terpadu Ekonomika dan Bisnis UGM (for geeks)
 
-Available commands:
+Usage
+-----
+`$ ./sintesis [command] [argument]`
+
+Available commands
 -------------------
 * `token` - Get token
 * `login [user] [pass]` - Login (UNIMPLEMENTED)
