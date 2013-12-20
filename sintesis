@@ -24,8 +24,11 @@ user_view()
 {
 	TOKEN=$1
 	token_check $TOKEN
-	echo -n "Name: "
-	user_name $TOKEN
+	local fullname_string=$(user_name $TOKEN)
+	local fullname=$(echo $fullname_string | sed 's/ (\(.*\)//')
+	local userid=$(echo $fullname_string | sed -e 's/\(.*\) (//' -e 's/)//')
+	echo "Name: $fullname"
+	echo "ID: $userid"
 	echo -n "Wi-Fi account: "
 	user_wifi $TOKEN
 }
@@ -56,7 +59,7 @@ user_name()
 	grep "<td align='center'><b>" | \
 	sed -e "s/\(.*\)<td align='center'><b>//" -e "s/<br>/ (/" -e "s/<\/b><\/td>/)/")
 
-	if [ "$out" == "" ]; then echo "Free/Logged out"; else echo $out; fi
+	if [ "$out" == "" ]; then echo "null"; else echo $out; fi
 }
 
 user_wifi()
