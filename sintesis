@@ -71,37 +71,24 @@ user_wifi()
 	echo ''
 }
 
-TEMP=`getopt -o i:o:st:v: --long login:,logout:,scan:,token,view: -n 'sintesis' -- "$@"`
-eval set -- "$TEMP"
-
-while true; do
-	case "$1" in
-		-i | --login )
-			user_login $2
-			shift 2
-			;;
-		-o | --logout )
-			user_logout $2
-			shift 2
-			;;
-		-s | --scan )
-			public_scan $2
-			shift 2
-			;;
-		-t | --token )
-			public_token
-			shift 2
-			;;
-		-v | --view )
-			public_view $2
-			shift 2
-			;;
-		-- )
-			shift
-			break
-			;;
-		* )
-			break
-			;;
-	esac
-done
+case "$1" in
+	li | login )
+		user_login $2
+		;;
+	lo | logout )
+		user_logout $2
+		;;
+	sc | scan )
+		public_scan $2
+		;;
+	to | token )
+		public_token
+		;;
+	vi | view )
+		public_view $2
+		;;
+	* )
+		echo "Invalid command: $1"
+		exit 1
+		;;
+esac
