@@ -20,7 +20,7 @@ public_scan()
 	done
 }
 
-public_view()
+user_view()
 {
 	TOKEN=$1
 	token_check $TOKEN
@@ -85,7 +85,7 @@ case "$1" in
 		public_token
 		;;
 	vi | view )
-		public_view $2
+		user_view $2
 		;;
 	* )
 		echo "Invalid command: $1"
