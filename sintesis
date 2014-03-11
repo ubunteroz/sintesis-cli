@@ -9,7 +9,7 @@ cat <<EOF
 / __|| | ||   \| |_ | |_ | _ |/ __|| ||__ \| _ |/ __|
 |__ ||__ || | || __||   || __||__ || || __|| __|| |
 |___/|___/|_|_|\___/|_|_|\___||___/|_|\___|\___||_|
-                   by ubunteroz
+                  by Surya Handika
 
 EOF
 
@@ -32,7 +32,7 @@ public_scan()
 {
 	TOKEN=$1
 	token_check $TOKEN
-	echo "Scanning for active token, starts from $TOKEN"
+	echo "Scanning for active token, starting from $TOKEN"
 	while true; do
 		echo -n "[$TOKEN] "
 		user_name $TOKEN
